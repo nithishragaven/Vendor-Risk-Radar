@@ -1,570 +1,1500 @@
-<!DOCTYPE html>
-<html lang="en">
+let detailChart = null;
 
-<head>
 
-    <meta charset="UTF-8">
+const dimensionFields = [
+    [
+        "TP Assessment",
+        "TP Assessment"
+    ],
+    [
+        "Business Criticality",
+        "Business Criticality"
+    ],
+    [
+        "Data Exposure",
+        "Data Exposure"
+    ],
+    [
+        "Issues / Exceptions",
+        "Issues / Exceptions"
+    ],
+    [
+        "Network Exposure",
+        "Network Exposure"
+    ]
+];
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
 
-    <title>
-        Vendor Details | Vendor Risk Radar
-    </title>
+/* =====================================================
+   DETAIL RADAR GRADIENT PLUGIN
+===================================================== */
 
+const detailRadarGradientPlugin = {
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='css/styles.css') }}"
-    >
+    id: "detailRadarGradient",
 
+    beforeDatasetsDraw(chart) {
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        const ctx =
+            chart.ctx;
 
-</head>
 
+        const meta =
+            chart
+                .getDatasetMeta(
+                    0
+                );
 
-<body>
 
+        if (
+            !meta ||
+            !meta.data ||
+            meta.data.length < 3
+        ) {
 
-<!-- TOP NAVIGATION -->
+            return;
 
-<header class="top-nav">
+        }
 
-    <div class="brand">
 
-        <div class="brand-mark">
-            MSD
-        </div>
+        const scale =
+            chart.scales.r;
 
-        <div>
 
-            <div class="brand-title">
-                Vendor Risk Radar
-            </div>
+        if (!scale) {
 
-            <div class="brand-subtitle">
-                Vendor Investigation
-            </div>
+            return;
 
-        </div>
+        }
 
-    </div>
 
+        const centerX =
+            scale.xCenter;
 
-    <nav>
 
-        <a href="/">
-            Risk Radar
-        </a>
+        const centerY =
+            scale.yCenter;
 
-        <a
-            href="#"
-            class="active"
-        >
-            Vendor Details
-        </a>
 
-    </nav>
+        const radius =
+            scale.drawingArea;
 
-</header>
 
+        ctx.save();
 
-<main class="dashboard-container">
 
+        /*
+           Vendor polygon
+        */
 
-    <!-- TOP BACK BUTTON -->
+        ctx.beginPath();
 
-    <div class="detail-top-actions">
 
-        <a
-            href="/"
-            class="back-button"
-        >
-            ← Back to Vendor Risk Radar
-        </a>
+        meta.data.forEach(
+            (
+                point,
+                index
+            ) => {
 
-    </div>
+                if (
+                    index === 0
+                ) {
 
+                    ctx.moveTo(
+                        point.x,
+                        point.y
+                    );
 
-    <!-- VENDOR HEADER -->
+                }
 
-    <section class="page-heading vendor-detail-heading">
+                else {
 
-        <div>
+                    ctx.lineTo(
+                        point.x,
+                        point.y
+                    );
 
-            <span class="vendor-label">
-                Vendor Risk Profile
-            </span>
+                }
 
-            <h1 id="detailVendorName">
-                Loading vendor...
-            </h1>
+            }
+        );
 
-            <p id="detailApplication">
-                Loading application...
-            </p>
 
-        </div>
+        ctx.closePath();
 
 
-        <span
-            id="detailRiskBand"
-            class="risk-badge"
-        >
-            -
-        </span>
+        /*
+           Clip colour to polygon
+        */
 
-    </section>
+        ctx.clip();
 
 
-    <!-- KPI CARDS -->
+        /*
+           Radial green -> amber -> red
+        */
 
-    <section class="kpi-grid">
+        const gradient =
+            ctx.createRadialGradient(
+                centerX,
+                centerY,
+                0,
+                centerX,
+                centerY,
+                radius
+            );
 
 
-        <article class="kpi-card critical">
+        gradient.addColorStop(
+            0.00,
+            "rgba(46,157,114,0.52)"
+        );
 
-            <span class="kpi-label">
-                Combined Risk
-            </span>
 
-            <span
-                class="kpi-value"
-                id="detailCombinedRisk"
-            >
-                -
-            </span>
+        gradient.addColorStop(
+            0.35,
+            "rgba(98,181,116,0.50)"
+        );
 
-            <span class="kpi-secondary">
-                Overall risk score
-            </span>
 
-        </article>
+        gradient.addColorStop(
+            0.52,
+            "rgba(229,180,56,0.53)"
+        );
 
 
-        <article class="kpi-card">
+        gradient.addColorStop(
+            0.72,
+            "rgba(230,126,34,0.56)"
+        );
 
-            <span class="kpi-label">
-                Correlation Confidence
-            </span>
 
-            <span
-                class="kpi-value"
-                id="detailCorrelation"
-            >
-                -
-            </span>
+        gradient.addColorStop(
+            1.00,
+            "rgba(207,62,69,0.58)"
+        );
 
-            <span class="kpi-secondary">
-                Entity matching confidence
-            </span>
 
-        </article>
+        ctx.fillStyle =
+            gradient;
 
 
-        <article class="kpi-card">
+        ctx.fillRect(
+            centerX - radius,
+            centerY - radius,
+            radius * 2,
+            radius * 2
+        );
 
-            <span class="kpi-label">
-                Evidence Confidence
-            </span>
 
-            <span
-                class="kpi-value"
-                id="detailConfidence"
-            >
-                -
-            </span>
+        ctx.restore();
 
-            <span class="kpi-secondary">
-                Available risk evidence
-            </span>
+    }
 
-        </article>
+};
 
 
-        <article class="kpi-card">
+Chart.register(
+    detailRadarGradientPlugin
+);
 
-            <span class="kpi-label">
-                Primary Risk Driver
-            </span>
 
-            <span
-                class="kpi-value kpi-vendor"
-                id="detailDriver"
-            >
-                -
-            </span>
+/* =====================================================
+   LOAD VENDOR
+===================================================== */
 
-            <span class="kpi-secondary">
-                Highest scoring dimension
-            </span>
+async function loadVendorDetail() {
 
-        </article>
+    try {
 
+        const response =
+            await fetch(
 
-        <article class="kpi-card">
+                `/api/vendor/${
+                    encodeURIComponent(
+                        window.MAPPING_ID
+                    )
+                }`
 
-            <span class="kpi-label">
-                Connected Application
-            </span>
+            );
 
-            <span
-                class="kpi-value kpi-vendor"
-                id="detailApplicationTile"
-            >
-                -
-            </span>
 
-            <span class="kpi-secondary">
-                Application relationship
-            </span>
+        const data =
+            await response.json();
 
-        </article>
 
-    </section>
+        if (
+            data.status !==
+            "success"
+        ) {
 
+            throw new Error(
+                data.message ||
+                "Unable to load vendor."
+            );
 
-    <!-- RADAR + RISK DRIVER BREAKDOWN -->
+        }
 
-    <section class="detail-main-grid">
 
+        renderVendor(
+            data.vendor
+        );
 
-        <!-- VENDOR RADAR -->
 
-        <article class="panel radar-panel">
+        renderEvidence(
+            data.evidence ||
+            []
+        );
 
-            <div class="panel-heading">
+    }
 
-                <div>
+    catch (
+        error
+    ) {
 
-                    <h2>
-                        Vendor Risk Radar
-                    </h2>
+        console.error(
+            error
+        );
 
-                    <p>
-                        Consolidated risk profile across five dimensions
-                    </p>
 
-                </div>
+        setElementText(
+            "detailVendorName",
+            "Unable to load vendor"
+        );
 
-            </div>
+    }
 
+}
 
-            <div class="detail-radar-wrapper">
 
-                <canvas id="vendorDetailRadar"></canvas>
+/* =====================================================
+   HELPERS
+===================================================== */
 
-            </div>
+function safeValue(
+    record,
+    key,
+    fallback = null
+) {
 
-        </article>
+    const result =
+        record[key];
 
 
-        <!-- DIMENSION BREAKDOWN -->
+    if (
+        result === undefined ||
+        result === null ||
+        result === ""
+    ) {
 
-        <article class="panel">
+        return fallback;
 
-            <div class="panel-heading">
+    }
 
-                <div>
 
-                    <h2>
-                        Risk Dimension Breakdown
-                    </h2>
+    return result;
 
-                    <p>
-                        Individual drivers contributing to the combined risk score
-                    </p>
+}
 
-                </div>
 
-            </div>
+function setElementText(
+    id,
+    value
+) {
 
+    const element =
+        document
+            .getElementById(
+                id
+            );
 
-            <div
-                id="dimensionBreakdown"
-                class="risk-drivers"
-            >
-            </div>
 
-        </article>
+    if (element) {
 
-    </section>
+        element.textContent =
+            value;
 
+    }
 
-    <!-- RISK PROFILE -->
+}
 
-    <section class="panel methodology">
 
-        <div class="panel-heading">
+function normalizeConfidence(
+    value
+) {
 
-            <div>
+    const number =
+        Number(
+            value || 0
+        );
 
-                <h2>
-                    Risk Profile
-                </h2>
 
-                <p>
-                    Normalized scores across the Vendor Risk Radar dimensions
-                </p>
+    if (
+        number > 1
+    ) {
 
-            </div>
+        return number / 100;
 
-        </div>
+    }
 
 
-        <div class="risk-profile-grid">
+    return number;
 
+}
 
-            <!-- TP ASSESSMENT -->
 
-            <article class="risk-profile-tile">
+/* =====================================================
+   RISK BAND
+===================================================== */
 
-                <span class="vendor-label">
-                    Third-party Assessment
-                </span>
+function riskBand(
+    score,
+    vendor
+) {
 
-                <div class="profile-value">
+    const criticalMissing =
+        Number(
+            vendor[
+                "Critical Missing Count"
+            ] || 0
+        );
 
-                    <strong id="detailTPAssessment">
-                        -
-                    </strong>
 
-                    <span>
+    if (
+        criticalMissing > 0
+    ) {
+
+        return "Review Required";
+
+    }
+
+
+    if (
+        score >= 4.5
+    ) {
+
+        return "Critical";
+
+    }
+
+
+    if (
+        score >= 3.75
+    ) {
+
+        return "Very High";
+
+    }
+
+
+    if (
+        score >= 2.75
+    ) {
+
+        return "High";
+
+    }
+
+
+    if (
+        score >= 1.75
+    ) {
+
+        return "Moderate";
+
+    }
+
+
+    return "Low";
+
+}
+
+
+function riskClass(
+    band
+) {
+
+    const normalized =
+        String(
+            band
+        )
+        .toLowerCase();
+
+
+    if (
+        normalized.includes(
+            "review"
+        )
+    ) {
+
+        return "risk-review";
+
+    }
+
+
+    if (
+        normalized.includes(
+            "critical"
+        )
+        ||
+        normalized.includes(
+            "very high"
+        )
+    ) {
+
+        return "risk-critical";
+
+    }
+
+
+    if (
+        normalized.includes(
+            "high"
+        )
+    ) {
+
+        return "risk-high";
+
+    }
+
+
+    if (
+        normalized.includes(
+            "moderate"
+        )
+    ) {
+
+        return "risk-moderate";
+
+    }
+
+
+    return "risk-low";
+
+}
+
+
+/* =====================================================
+   SCORE COLOUR
+===================================================== */
+
+function riskScoreColor(
+    score
+) {
+
+    const safeScore =
+        Math.max(
+            1,
+            Math.min(
+                5,
+                Number(score) || 1
+            )
+        );
+
+
+    const percentage =
+        (
+            safeScore -
+            1
+        )
+        /
+        4;
+
+
+    let hue;
+
+
+    if (
+        percentage <=
+        0.5
+    ) {
+
+        const firstHalf =
+            percentage /
+            0.5;
+
+
+        hue =
+            140 -
+            (
+                85 *
+                firstHalf
+            );
+
+    }
+
+    else {
+
+        const secondHalf =
+            (
+                percentage -
+                0.5
+            )
+            /
+            0.5;
+
+
+        hue =
+            55 -
+            (
+                53 *
+                secondHalf
+            );
+
+    }
+
+
+    return (
+        `hsl(${hue}, 72%, 45%)`
+    );
+
+}
+
+
+/* =====================================================
+   VALUES
+===================================================== */
+
+function getCombinedRisk(
+    vendor
+) {
+
+    return Number(
+
+        safeValue(
+            vendor,
+            "Combined Risk - Data",
+
+            safeValue(
+                vendor,
+                "Combined Risk",
+                0
+            )
+        )
+
+    );
+
+}
+
+
+function getDimensions(
+    vendor
+) {
+
+    return dimensionFields
+        .map(
+            item => ({
+
+                label:
+                    item[0],
+
+                score:
+                    Number(
+
+                        safeValue(
+                            vendor,
+                            item[1],
+                            0
+                        )
+
+                    )
+
+            })
+        );
+
+}
+
+
+function determineTopDriver(
+    vendor
+) {
+
+    const dimensionValues =
+        getDimensions(
+            vendor
+        );
+
+
+    dimensionValues.sort(
+        (a, b) =>
+            b.score -
+            a.score
+    );
+
+
+    return (
+        dimensionValues.length
+        ?
+        dimensionValues[0]
+            .label
+        :
+        "-"
+    );
+
+}
+
+
+/* =====================================================
+   VENDOR CONTENT
+===================================================== */
+
+function renderVendor(
+    vendor
+) {
+
+    const vendorName =
+        safeValue(
+            vendor,
+            "Vendor",
+            "Unknown Vendor"
+        );
+
+
+    const application =
+        safeValue(
+            vendor,
+            "Application",
+            "-"
+        );
+
+
+    const combinedRisk =
+        getCombinedRisk(
+            vendor
+        );
+
+
+    const correlation =
+        normalizeConfidence(
+
+            safeValue(
+                vendor,
+                "Correlation Confidence",
+                0
+            )
+
+        );
+
+
+    const evidenceConfidence =
+        normalizeConfidence(
+
+            safeValue(
+                vendor,
+                "Confidence Score",
+                0
+            )
+
+        );
+
+
+    const topDriver =
+        safeValue(
+            vendor,
+            "Key Driver",
+            determineTopDriver(
+                vendor
+            )
+        );
+
+
+    setElementText(
+        "detailVendorName",
+        vendorName
+    );
+
+
+    setElementText(
+        "detailApplication",
+        application
+    );
+
+
+    setElementText(
+        "detailApplicationTile",
+        application
+    );
+
+
+    setElementText(
+        "detailCombinedRisk",
+        `${combinedRisk.toFixed(2)} / 5`
+    );
+
+
+    setElementText(
+        "detailCorrelation",
+        `${Math.round(
+            correlation * 100
+        )}%`
+    );
+
+
+    setElementText(
+        "detailConfidence",
+        `${Math.round(
+            evidenceConfidence *
+            100
+        )}%`
+    );
+
+
+    setElementText(
+        "detailDriver",
+        topDriver
+    );
+
+
+    const tpAssessment =
+        Number(
+
+            safeValue(
+                vendor,
+                "TP Assessment",
+                0
+            )
+
+        );
+
+
+    const businessCriticality =
+        Number(
+
+            safeValue(
+                vendor,
+                "Business Criticality",
+                0
+            )
+
+        );
+
+
+    const dataExposure =
+        Number(
+
+            safeValue(
+                vendor,
+                "Data Exposure",
+                0
+            )
+
+        );
+
+
+    const issues =
+        Number(
+
+            safeValue(
+                vendor,
+                "Issues / Exceptions",
+                0
+            )
+
+        );
+
+
+    const networkExposure =
+        Number(
+
+            safeValue(
+                vendor,
+                "Network Exposure",
+                0
+            )
+
+        );
+
+
+    setElementText(
+        "detailTPAssessment",
+        tpAssessment.toFixed(1)
+    );
+
+
+    setElementText(
+        "detailBusinessCriticality",
+        businessCriticality.toFixed(1)
+    );
+
+
+    setElementText(
+        "detailDataExposure",
+        dataExposure.toFixed(1)
+    );
+
+
+    setElementText(
+        "detailIssues",
+        issues.toFixed(1)
+    );
+
+
+    setElementText(
+        "detailNetworkExposure",
+        networkExposure.toFixed(1)
+    );
+
+
+    const band =
+        riskBand(
+            combinedRisk,
+            vendor
+        );
+
+
+    const bandElement =
+        document
+            .getElementById(
+                "detailRiskBand"
+            );
+
+
+    bandElement.textContent =
+        band;
+
+
+    bandElement.className =
+        `risk-badge ${
+            riskClass(
+                band
+            )
+        }`;
+
+
+    renderRadar(
+        vendor
+    );
+
+
+    renderDimensions(
+        vendor
+    );
+
+}
+
+
+/* =====================================================
+   DETAIL RADAR
+===================================================== */
+
+function renderRadar(
+    vendor
+) {
+
+    const labels =
+        dimensionFields
+            .map(
+                item =>
+                    item[0]
+            );
+
+
+    const values =
+        dimensionFields
+            .map(
+                item =>
+                    Number(
+
+                        safeValue(
+                            vendor,
+                            item[1],
+                            0
+                        )
+
+                    )
+            );
+
+
+    if (
+        detailChart
+    ) {
+
+        detailChart.destroy();
+
+    }
+
+
+    const context =
+        document
+            .getElementById(
+                "vendorDetailRadar"
+            )
+            .getContext(
+                "2d"
+            );
+
+
+    detailChart =
+        new Chart(
+            context,
+            {
+
+                type:
+                    "radar",
+
+
+                data: {
+
+                    labels:
+                        labels,
+
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                safeValue(
+                                    vendor,
+                                    "Vendor",
+                                    "Vendor"
+                                ),
+
+                            data:
+                                values,
+
+                            backgroundColor:
+                                "rgba(0,0,0,0)",
+
+                            borderColor:
+                                "#006b63",
+
+                            pointBackgroundColor:
+                                "#00857c",
+
+                            pointBorderColor:
+                                "#ffffff",
+
+                            pointBorderWidth:
+                                2,
+
+                            pointRadius:
+                                5,
+
+                            pointHoverRadius:
+                                7,
+
+                            borderWidth:
+                                3,
+
+                            tension:
+                                0.08
+
+                        }
+
+                    ]
+
+                },
+
+
+                options: {
+
+                    devicePixelRatio:
+                        Math.max(
+                            window
+                                .devicePixelRatio
+                                || 1,
+                            3
+                        ),
+
+
+                    responsive:
+                        true,
+
+
+                    maintainAspectRatio:
+                        false,
+
+
+                    animation: {
+
+                        duration:
+                            350
+
+                    },
+
+
+                    scales: {
+
+                        r: {
+
+                            min:
+                                0,
+
+                            max:
+                                5,
+
+                            beginAtZero:
+                                true,
+
+
+                            ticks: {
+
+                                stepSize:
+                                    1,
+
+                                color:
+                                    "#526A70",
+
+                                backdropColor:
+                                    "transparent",
+
+                                showLabelBackdrop:
+                                    false,
+
+                                font: {
+
+                                    size:
+                                        12,
+
+                                    weight:
+                                        "600"
+
+                                }
+
+                            },
+
+
+                            pointLabels: {
+
+                                color:
+                                    "#17324D",
+
+                                padding:
+                                    15,
+
+                                font: {
+
+                                    size:
+                                        12,
+
+                                    weight:
+                                        "700"
+
+                                }
+
+                            },
+
+
+                            grid: {
+
+                                color:
+                                    "rgba(79,111,113,0.20)",
+
+                                lineWidth:
+                                    1
+
+                            },
+
+
+                            angleLines: {
+
+                                color:
+                                    "rgba(79,111,113,0.23)",
+
+                                lineWidth:
+                                    1
+
+                            }
+
+                        }
+
+                    },
+
+
+                    plugins: {
+
+                        legend: {
+
+                            position:
+                                "top",
+
+                            labels: {
+
+                                color:
+                                    "#17324D",
+
+                                usePointStyle:
+                                    true,
+
+                                padding:
+                                    18,
+
+                                font: {
+
+                                    size:
+                                        11,
+
+                                    weight:
+                                        "600"
+
+                                }
+
+                            }
+
+                        },
+
+
+                        tooltip: {
+
+                            backgroundColor:
+                                "#17324D",
+
+                            titleColor:
+                                "#FFFFFF",
+
+                            bodyColor:
+                                "#FFFFFF",
+
+                            padding:
+                                11,
+
+                            displayColors:
+                                false
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   DIMENSION BREAKDOWN
+===================================================== */
+
+function renderDimensions(
+    vendor
+) {
+
+    const container =
+        document
+            .getElementById(
+                "dimensionBreakdown"
+            );
+
+
+    container.innerHTML =
+        "";
+
+
+    getDimensions(
+        vendor
+    )
+        .sort(
+            (a, b) =>
+                b.score -
+                a.score
+        )
+        .forEach(
+            dimension => {
+
+                const div =
+                    document
+                        .createElement(
+                            "div"
+                        );
+
+
+                div.className =
+                    "risk-driver";
+
+
+                const barColour =
+                    riskScoreColor(
+                        dimension.score
+                    );
+
+
+                const width =
+                    Math.max(
+                        0,
+                        Math.min(
+                            (
+                                dimension.score /
+                                5
+                            ) * 100,
+                            100
+                        )
+                    );
+
+
+                div.innerHTML = `
+
+                    <div
+                        class="
+                            driver-heading-row
+                        "
+                    >
+
+                        <div
+                            class="
+                                driver-title
+                            "
+                        >
+
+                            ${dimension.label}
+
+                        </div>
+
+
+                        <div
+                            class="
+                                driver-value
+                            "
+
+                            style="
+                                color:
+                                ${barColour};
+                            "
+                        >
+
+                            ${dimension.score.toFixed(1)}
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            risk-progress
+                        "
+                    >
+
+                        <span
+                            style="
+                                width:
+                                ${width}%;
+
+                                background:
+                                ${barColour};
+                            "
+                        >
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            driver-score
+                        "
+                    >
+
+                        Risk score:
+                        ${dimension.score.toFixed(1)}
                         / 5
-                    </span>
 
-                </div>
+                    </div>
 
-            </article>
+                `;
 
 
-            <!-- BUSINESS CRITICALITY -->
+                container
+                    .appendChild(
+                        div
+                    );
 
-            <article class="risk-profile-tile">
+            }
+        );
 
-                <span class="vendor-label">
-                    Business Criticality
-                </span>
+}
 
-                <div class="profile-value">
 
-                    <strong id="detailBusinessCriticality">
-                        -
-                    </strong>
+/* =====================================================
+   EVIDENCE
+===================================================== */
 
-                    <span>
-                        / 5
-                    </span>
+function renderEvidence(
+    evidence
+) {
 
-                </div>
+    const body =
+        document
+            .getElementById(
+                "evidenceTableBody"
+            );
 
-            </article>
 
+    body.innerHTML =
+        "";
 
-            <!-- DATA EXPOSURE -->
 
-            <article class="risk-profile-tile">
+    if (
+        !evidence.length
+    ) {
 
-                <span class="vendor-label">
-                    Data Exposure
-                </span>
+        body.innerHTML = `
 
-                <div class="profile-value">
+            <tr>
 
-                    <strong id="detailDataExposure">
-                        -
-                    </strong>
+                <td
+                    colspan="5"
+                >
 
-                    <span>
-                        / 5
-                    </span>
+                    No linked evidence records found.
 
-                </div>
+                </td>
 
-            </article>
+            </tr>
 
+        `;
 
-            <!-- ISSUES -->
 
-            <article class="risk-profile-tile">
+        return;
 
-                <span class="vendor-label">
-                    Issues & Exceptions
-                </span>
+    }
 
-                <div class="profile-value">
 
-                    <strong id="detailIssues">
-                        -
-                    </strong>
+    evidence.forEach(
+        record => {
 
-                    <span>
-                        / 5
-                    </span>
+            const row =
+                document
+                    .createElement(
+                        "tr"
+                    );
 
-                </div>
 
-            </article>
+            row.innerHTML = `
 
+                <td>
 
-            <!-- NETWORK -->
+                    ${escapeHtml(
+                        record[
+                            "Source"
+                        ] || "-"
+                    )}
 
-            <article class="risk-profile-tile">
+                </td>
 
-                <span class="vendor-label">
-                    Network Exposure
-                </span>
 
-                <div class="profile-value">
+                <td>
 
-                    <strong id="detailNetworkExposure">
-                        -
-                    </strong>
+                    ${escapeHtml(
+                        record[
+                            "Dimension"
+                        ] || "-"
+                    )}
 
-                    <span>
-                        / 5
-                    </span>
+                </td>
 
-                </div>
 
-            </article>
+                <td>
 
+                    ${escapeHtml(
+                        record[
+                            "Raw Evidence"
+                        ] || "-"
+                    )}
 
-        </div>
+                </td>
 
-    </section>
 
+                <td>
 
-    <!-- SUPPORTING EVIDENCE -->
+                    ${
+                        record[
+                            "Normalized Score"
+                        ]
+                        ??
+                        "-"
+                    }
 
-    <section class="panel table-panel">
+                </td>
 
-        <div class="table-header">
 
-            <div>
+                <td>
 
-                <h2>
-                    Supporting Evidence
-                </h2>
+                    ${escapeHtml(
 
-                <p>
-                    Source-level evidence supporting the vendor risk assessment
-                </p>
+                        formatDate(
+                            record[
+                                "Evidence Date"
+                            ]
+                        )
 
-            </div>
+                    )}
 
-        </div>
+                </td>
 
+            `;
 
-        <div class="table-scroll">
 
-            <table>
+            body.appendChild(
+                row
+            );
 
-                <thead>
+        }
+    );
 
-                    <tr>
+}
 
-                        <th>
-                            Source
-                        </th>
 
-                        <th>
-                            Risk Dimension
-                        </th>
+/* =====================================================
+   DATE
+===================================================== */
 
-                        <th>
-                            Evidence
-                        </th>
+function formatDate(
+    value
+) {
 
-                        <th>
-                            Normalized Score
-                        </th>
+    if (!value) {
 
-                        <th>
-                            Evidence Date
-                        </th>
+        return "-";
 
-                    </tr>
+    }
 
-                </thead>
 
+    return String(
+        value
+    )
+    .replace(
+        "T00:00:00",
+        ""
+    )
+    .replace(
+        " 00:00:00",
+        ""
+    );
 
-                <tbody id="evidenceTableBody">
-                </tbody>
+}
 
-            </table>
 
-        </div>
+/* =====================================================
+   HTML SAFETY
+===================================================== */
 
-    </section>
+function escapeHtml(
+    value
+) {
 
+    const div =
+        document
+            .createElement(
+                "div"
+            );
 
-    <!-- EXPLAINABILITY -->
 
-    <section class="panel methodology">
+    div.textContent =
+        String(
+            value
+        );
 
-        <div class="panel-heading">
 
-            <div>
+    return div.innerHTML;
 
-                <h2>
-                    Why This Vendor Has This Risk Score
-                </h2>
+}
 
-                <p>
-                    Explainable assessment based on connected source evidence
-                </p>
 
-            </div>
+/* =====================================================
+   START
+===================================================== */
 
-        </div>
-
-
-        <div id="riskExplanation">
-
-            <p>
-                The assessment combines third-party risk, business criticality,
-                data exposure, issues and exceptions, and network exposure.
-            </p>
-
-            <p>
-                Each conclusion can be traced to the supporting evidence shown
-                above.
-            </p>
-
-        </div>
-
-    </section>
-
-
-    <!-- FOOTER -->
-
-    <footer class="dashboard-footer">
-
-        Vendor Risk Radar | Hackathon Prototype
-
-    </footer>
-
-</main>
-
-
-<!-- PASS CURRENT VENDOR ID TO JAVASCRIPT -->
-
-<script>
-
-    window.MAPPING_ID = "{{ mapping_id }}";
-
-</script>
-
-
-<script
-    src="{{ url_for('static', filename='js/vendor-detail.js') }}"
-></script>
-
-
-</body>
-
-</html>
+loadVendorDetail();
