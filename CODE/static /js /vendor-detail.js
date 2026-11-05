@@ -1,1 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Vendor Details | Vendor Risk Radar
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/styles.css') }}"
+    >
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+
+<body>
+
+
+<!-- TOP NAVIGATION -->
+
+<header class="top-nav">
+
+    <div class="brand">
+
+        <div class="brand-mark">
+            MSD
+        </div>
+
+        <div>
+
+            <div class="brand-title">
+                Vendor Risk Radar
+            </div>
+
+            <div class="brand-subtitle">
+                Vendor Investigation
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <nav>
+
+        <a href="/">
+            Risk Radar
+        </a>
+
+        <a
+            href="#"
+            class="active"
+        >
+            Vendor Details
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main class="dashboard-container">
+
+
+    <!-- TOP BACK BUTTON -->
+
+    <div class="detail-top-actions">
+
+        <a
+            href="/"
+            class="back-button"
+        >
+            ← Back to Vendor Risk Radar
+        </a>
+
+    </div>
+
+
+    <!-- VENDOR HEADER -->
+
+    <section class="page-heading vendor-detail-heading">
+
+        <div>
+
+            <span class="vendor-label">
+                Vendor Risk Profile
+            </span>
+
+            <h1 id="detailVendorName">
+                Loading vendor...
+            </h1>
+
+            <p id="detailApplication">
+                Loading application...
+            </p>
+
+        </div>
+
+
+        <span
+            id="detailRiskBand"
+            class="risk-badge"
+        >
+            -
+        </span>
+
+    </section>
+
+
+    <!-- KPI CARDS -->
+
+    <section class="kpi-grid">
+
+
+        <article class="kpi-card critical">
+
+            <span class="kpi-label">
+                Combined Risk
+            </span>
+
+            <span
+                class="kpi-value"
+                id="detailCombinedRisk"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Overall risk score
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Correlation Confidence
+            </span>
+
+            <span
+                class="kpi-value"
+                id="detailCorrelation"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Entity matching confidence
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Evidence Confidence
+            </span>
+
+            <span
+                class="kpi-value"
+                id="detailConfidence"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Available risk evidence
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Primary Risk Driver
+            </span>
+
+            <span
+                class="kpi-value kpi-vendor"
+                id="detailDriver"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Highest scoring dimension
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Connected Application
+            </span>
+
+            <span
+                class="kpi-value kpi-vendor"
+                id="detailApplicationTile"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Application relationship
+            </span>
+
+        </article>
+
+    </section>
+
+
+    <!-- RADAR + RISK DRIVER BREAKDOWN -->
+
+    <section class="detail-main-grid">
+
+
+        <!-- VENDOR RADAR -->
+
+        <article class="panel radar-panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <h2>
+                        Vendor Risk Radar
+                    </h2>
+
+                    <p>
+                        Consolidated risk profile across five dimensions
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-radar-wrapper">
+
+                <canvas id="vendorDetailRadar"></canvas>
+
+            </div>
+
+        </article>
+
+
+        <!-- DIMENSION BREAKDOWN -->
+
+        <article class="panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <h2>
+                        Risk Dimension Breakdown
+                    </h2>
+
+                    <p>
+                        Individual drivers contributing to the combined risk score
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="dimensionBreakdown"
+                class="risk-drivers"
+            >
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- RISK PROFILE -->
+
+    <section class="panel methodology">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <h2>
+                    Risk Profile
+                </h2>
+
+                <p>
+                    Normalized scores across the Vendor Risk Radar dimensions
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="risk-profile-grid">
+
+
+            <!-- TP ASSESSMENT -->
+
+            <article class="risk-profile-tile">
+
+                <span class="vendor-label">
+                    Third-party Assessment
+                </span>
+
+                <div class="profile-value">
+
+                    <strong id="detailTPAssessment">
+                        -
+                    </strong>
+
+                    <span>
+                        / 5
+                    </span>
+
+                </div>
+
+            </article>
+
+
+            <!-- BUSINESS CRITICALITY -->
+
+            <article class="risk-profile-tile">
+
+                <span class="vendor-label">
+                    Business Criticality
+                </span>
+
+                <div class="profile-value">
+
+                    <strong id="detailBusinessCriticality">
+                        -
+                    </strong>
+
+                    <span>
+                        / 5
+                    </span>
+
+                </div>
+
+            </article>
+
+
+            <!-- DATA EXPOSURE -->
+
+            <article class="risk-profile-tile">
+
+                <span class="vendor-label">
+                    Data Exposure
+                </span>
+
+                <div class="profile-value">
+
+                    <strong id="detailDataExposure">
+                        -
+                    </strong>
+
+                    <span>
+                        / 5
+                    </span>
+
+                </div>
+
+            </article>
+
+
+            <!-- ISSUES -->
+
+            <article class="risk-profile-tile">
+
+                <span class="vendor-label">
+                    Issues & Exceptions
+                </span>
+
+                <div class="profile-value">
+
+                    <strong id="detailIssues">
+                        -
+                    </strong>
+
+                    <span>
+                        / 5
+                    </span>
+
+                </div>
+
+            </article>
+
+
+            <!-- NETWORK -->
+
+            <article class="risk-profile-tile">
+
+                <span class="vendor-label">
+                    Network Exposure
+                </span>
+
+                <div class="profile-value">
+
+                    <strong id="detailNetworkExposure">
+                        -
+                    </strong>
+
+                    <span>
+                        / 5
+                    </span>
+
+                </div>
+
+            </article>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- SUPPORTING EVIDENCE -->
+
+    <section class="panel table-panel">
+
+        <div class="table-header">
+
+            <div>
+
+                <h2>
+                    Supporting Evidence
+                </h2>
+
+                <p>
+                    Source-level evidence supporting the vendor risk assessment
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-scroll">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Source
+                        </th>
+
+                        <th>
+                            Risk Dimension
+                        </th>
+
+                        <th>
+                            Evidence
+                        </th>
+
+                        <th>
+                            Normalized Score
+                        </th>
+
+                        <th>
+                            Evidence Date
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="evidenceTableBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- EXPLAINABILITY -->
+
+    <section class="panel methodology">
+
+        <div class="panel-heading">
+
+            <div>
+
+                <h2>
+                    Why This Vendor Has This Risk Score
+                </h2>
+
+                <p>
+                    Explainable assessment based on connected source evidence
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div id="riskExplanation">
+
+            <p>
+                The assessment combines third-party risk, business criticality,
+                data exposure, issues and exceptions, and network exposure.
+            </p>
+
+            <p>
+                Each conclusion can be traced to the supporting evidence shown
+                above.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer class="dashboard-footer">
+
+        Vendor Risk Radar | Hackathon Prototype
+
+    </footer>
+
+</main>
+
+
+<!-- PASS CURRENT VENDOR ID TO JAVASCRIPT -->
+
+<script>
+
+    window.MAPPING_ID = "{{ mapping_id }}";
+
+</script>
+
+
+<script
+    src="{{ url_for('static', filename='js/vendor-detail.js') }}"
+></script>
+
+
+</body>
+
+</html>
