@@ -1,1 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Vendor Risk Radar</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/styles.css') }}"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<header class="top-nav">
+
+    <div class="brand">
+
+        <div class="brand-mark">
+            MSD
+        </div>
+
+        <div>
+
+            <div class="brand-title">
+                Vendor Risk Radar
+            </div>
+
+            <div class="brand-subtitle">
+                Connected Insights. Explainable Risk.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <nav>
+
+        <a href="/" class="active">
+            Risk Radar
+        </a>
+
+        <a href="#vendor-table">
+            Vendor Explorer
+        </a>
+
+        <a href="#methodology">
+            Methodology
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main class="dashboard-container">
+
+
+    <!-- PAGE HEADER -->
+
+    <section class="page-heading">
+
+        <div>
+
+            <h1>
+                Vendor Risk Overview
+            </h1>
+
+            <p>
+                A unified, explainable view of vendor risk across applications,
+                data, controls, exceptions and connectivity.
+            </p>
+
+        </div>
+
+
+        <!-- RISK LENS -->
+
+        <div class="scenario-control">
+
+            <span class="scenario-title">
+                Risk Lens
+            </span>
+
+            <div class="scenario-container">
+
+                <button
+                    class="scenario-button active"
+                    data-scenario="data"
+                >
+                    Data Risk Focus
+                </button>
+
+                <button
+                    class="scenario-button"
+                    data-scenario="network"
+                >
+                    Network Risk Focus
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- KPI TILES -->
+
+    <section class="kpi-grid">
+
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Vendors Monitored
+            </span>
+
+            <span
+                class="kpi-value"
+                id="vendorCount"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Across connected sources
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card critical">
+
+            <span class="kpi-label">
+                Critical / Very High
+            </span>
+
+            <span
+                class="kpi-value"
+                id="criticalCount"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Requiring attention
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card review">
+
+            <span class="kpi-label">
+                Review Required
+            </span>
+
+            <span
+                class="kpi-value"
+                id="reviewCount"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Missing critical evidence
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Highest Risk Vendor
+            </span>
+
+            <span
+                class="kpi-value kpi-vendor"
+                id="highestRiskVendor"
+            >
+                -
+            </span>
+
+            <span
+                class="kpi-secondary"
+                id="highestRiskScore"
+            >
+                -
+            </span>
+
+        </article>
+
+
+        <article class="kpi-card">
+
+            <span class="kpi-label">
+                Avg. Evidence Confidence
+            </span>
+
+            <span
+                class="kpi-value"
+                id="averageConfidence"
+            >
+                -
+            </span>
+
+            <span class="kpi-secondary">
+                Portfolio average
+            </span>
+
+        </article>
+
+    </section>
+
+
+    <!-- MAIN VISUAL AREA -->
+
+    <section class="main-grid">
+
+
+        <!-- RADAR -->
+
+        <article class="panel radar-panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <h2 id="radarTitle">
+                        Risk Radar
+                    </h2>
+
+                    <p>
+                        Selected vendor compared with portfolio average
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="radar-wrapper">
+
+                <canvas id="riskRadar"></canvas>
+
+            </div>
+
+        </article>
+
+
+        <!-- KEY RISK DRIVERS -->
+
+        <article class="panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <h2>
+                        Key Risk Drivers
+                    </h2>
+
+                    <p>
+                        Factors contributing most to the selected vendor risk
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="riskDrivers"
+                class="risk-drivers"
+            >
+            </div>
+
+        </article>
+
+
+        <!-- SELECTED VENDOR -->
+
+        <article class="panel vendor-summary">
+
+            <div class="vendor-title-row">
+
+                <div>
+
+                    <span class="vendor-label">
+                        Selected Vendor
+                    </span>
+
+                    <h2 id="selectedVendorName">
+                        -
+                    </h2>
+
+                </div>
+
+
+                <span
+                    id="selectedRiskBand"
+                    class="risk-badge"
+                >
+                    -
+                </span>
+
+            </div>
+
+
+            <div class="summary-score">
+
+                <span
+                    id="selectedRiskScore"
+                    class="large-score"
+                >
+                    -
+                </span>
+
+                <span class="score-out-of">
+                    / 5
+                </span>
+
+            </div>
+
+
+            <div class="summary-details">
+
+                <div>
+
+                    <span>
+                        Primary Application
+                    </span>
+
+                    <strong id="selectedApplication">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Correlation Confidence
+                    </span>
+
+                    <strong id="selectedCorrelation">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Evidence Confidence
+                    </span>
+
+                    <strong id="selectedEvidenceConfidence">
+                        -
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Top Risk Driver
+                    </span>
+
+                    <strong id="selectedDriver">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <a
+                id="vendorDetailButton"
+                class="primary-button"
+                href="#"
+            >
+                View Full Vendor Details
+            </a>
+
+        </article>
+
+    </section>
+
+
+    <!-- VENDOR TABLE -->
+
+    <section
+        id="vendor-table"
+        class="panel table-panel"
+    >
+
+        <div class="table-header">
+
+            <div>
+
+                <h2>
+                    Vendor Risk Ranking
+                </h2>
+
+                <p>
+                    Select a vendor to update the radar or open the detailed
+                    vendor investigation view.
+                </p>
+
+            </div>
+
+
+            <input
+                id="vendorSearch"
+                type="text"
+                placeholder="Search vendor or application..."
+            >
+
+        </div>
+
+
+        <div class="table-scroll">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>
+                            Vendor
+                        </th>
+
+                        <th>
+                            Primary Application
+                        </th>
+
+                        <th>
+                            Combined Risk
+                        </th>
+
+                        <th>
+                            Risk Level
+                        </th>
+
+                        <th>
+                            Evidence Confidence
+                        </th>
+
+                        <th>
+                            Top Risk Driver
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="vendorTableBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- METHODOLOGY -->
+
+    <section
+        id="methodology"
+        class="panel methodology"
+    >
+
+        <div class="panel-heading">
+
+            <div>
+
+                <h2>
+                    Explainable Risk Methodology
+                </h2>
+
+                <p>
+                    Five dimensions contribute to the consolidated vendor
+                    and application risk profile.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="methodology-grid">
+
+            <div>
+                Third-party Assessment
+            </div>
+
+            <div>
+                Business Criticality
+            </div>
+
+            <div>
+                Data Exposure
+            </div>
+
+            <div>
+                Issues & Exceptions
+            </div>
+
+            <div>
+                Network Exposure
+            </div>
+
+        </div>
+
+
+        <p>
+            Risk score, correlation confidence and evidence confidence
+            are treated as separate measures. Missing critical information
+            triggers review rather than automatically indicating low risk.
+        </p>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer class="dashboard-footer">
+
+        Vendor Risk Radar | Hackathon Prototype
+
+    </footer>
+
+</main>
+
+
+<script
+    src="{{ url_for('static', filename='js/dashboard.js') }}"
+></script>
+
+</body>
+
+</html>
