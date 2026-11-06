@@ -122,7 +122,7 @@ data/           Source datasets
 docs/           Architecture and demo documentation
 evaluation/     Self-assessment artifacts
 outputs/        Dashboard screenshots and sample outputs
-scripts/        Utility scripts
+script/        Utility scripts
 ```
 
 ---
