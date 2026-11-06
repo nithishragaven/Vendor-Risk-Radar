@@ -35,7 +35,7 @@ jobs:
         run: |
           test -f README.md
           test -f Submission.json
-          test -f docs/Architecture_Diagram.png
+          test -f docs/Architecture Diagram.png
           test -f docs/Demo_Runbook.md
           test -f evaluation/Self_Assessment.md
 
