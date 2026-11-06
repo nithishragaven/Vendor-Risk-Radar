@@ -3,9 +3,9 @@
   "team_id": "PS-12-Third Eye Security",
   "team_name": "Third Eye Security",
   "problem_id": "PS-12",
-  "target_problem": "Third-party risk data is fragmented across vendor assessments, application inventories, controls, firewall records and exception management systems, making it difficult to identify high-risk vendors, understand risk drivers and support evidence-based decision making.",
-  "architecture_summary": "Vendor Risk Radar consolidates risk signals from multiple disconnected enterprise data sources including vendor assessments, CMDB applications, IT controls, firewall records and exceptions. A correlation framework combines exact identifiers, normalized names, manual mappings and controlled fuzzy matching to create a unified vendor risk profile. Risk is calculated using configurable weighted dimensions including Third-Party Assessment Risk, Business Criticality, Data Exposure, Issues & Exceptions and Network Exposure. The solution provides explainable risk scoring, evidence traceability, confidence scoring and interactive visualizations including radar charts, rankings and vendor drill-through analysis.",
-  "code_reference": "Vendor Risk Radar prototype application available in this repository.",
+  "target_problem": "Vendor risk data is fragmented across multiple systems including third-party assessments, CMDBs, firewall inventories, controls repositories, and exception registers, making it difficult to identify, assess, and explain vendor risk. Vendor Risk Radar consolidates these disconnected sources into a unified and explainable risk intelligence platform.",
+  "architecture_summary": "Vendor Risk Radar leverages Python, Flask, JavaScript, and Excel-based data integration to correlate vendor information across multiple enterprise risk sources. The solution calculates configurable risk scores using weighted risk dimensions including third-party assessment risk, business criticality, data exposure, network exposure, and open issues. The platform provides explainable risk scoring, evidence lineage, confidence metrics, scenario-based analysis, interactive radar visualizations, and vendor-level drill-through capabilities.",
+  "code_reference": "GitHub Repository Submission",
   "languages": [
     "Python",
     "HTML",
@@ -13,52 +13,33 @@
     "JavaScript"
   ],
   "source_files": [
-    "app.py",
-    "requirements.txt",
-    "data/Vendor_Risk_Radar_Optimized_Framework.xlsx",
-    "templates/index.html",
-    "templates/vendor_detail.html",
-    "static/css/styles.css",
-    "static/js/dashboard.js",
-    "static/js/vendor-detail.js"
+    "backend/app.py",
+    "frontend/templates/index.html",
+    "frontend/templates/vendor_detail.html",
+    "frontend/static/js/dashboard.js",
+    "frontend/static/js/vendor-detail.js",
+    "frontend/static/css/styles.css"
   ],
   "sample_outputs": [
     {
-      "case_id": "octoplant-high-risk-vendor",
-      "input": {
-        "vendor": "Octoplant",
-        "scenario": "Network Risk Focus",
-        "third_party_assessment": 4,
-        "business_criticality": 5,
-        "data_exposure": 3,
-        "issues_exceptions": 5,
-        "network_exposure": 4
-      },
-      "output": {
-        "combined_risk_score": 4.34,
-        "risk_band": "Critical",
-        "evidence_confidence": "95%",
-        "top_risk_drivers": [
-          "Mission Critical Application",
-          "67 of 71 OT Controls Remaining",
-          "Permanent Network Connectivity",
-          "Industrial Protocol Exposure"
-        ],
-        "recommendation": "Immediate risk review and mitigation planning recommended."
-      },
-      "input_images": [],
+      "case_id": "vendor-risk-assessment",
+      "input": "Vendor assessment data, CMDB application data, firewall connectivity data, IT control status, and exception management records.",
+      "output": "Unified vendor risk profile including combined risk score, risk band, confidence score, top risk drivers, evidence lineage, radar visualization, and recommended focus areas.",
+      "input_images": [
+        "docs/Architecture_Diagram.png"
+      ],
       "output_images": [
-        "assets/screenshots/risk-radar-dashboard.png",
-        "assets/screenshots/vendor-detail-view.png"
+        "outputs/Main_Dashboard.png",
+        "outputs/Vendor_Details_Tab.png"
       ]
     }
   ],
   "known_limitations": [
-    "Current version uses a prototype correlation framework and may require manual mapping where shared identifiers are unavailable.",
-    "Confidence scoring is independent of risk scoring and should be interpreted alongside risk ratings.",
-    "The prototype is designed for visualization and decision support; it does not automatically enforce remediation actions.",
-    "Historical trend analysis and predictive risk forecasting are not included in the current version.",
-    "Synthetic relationships may be used during demonstrations where complete source-system linkage is unavailable."
+    "The current prototype uses a predefined vendor-to-application mapping, including synthetic relationships created solely for demonstration purposes.",
+    "Risk scores are based on configurable business rules and weighting models rather than historical incident outcomes.",
+    "Real-time integrations with enterprise systems are not implemented in the prototype.",
+    "The solution currently evaluates a limited sample dataset intended for hackathon demonstration purposes.",
+    "Correlation confidence is displayed independently and is not yet incorporated into the final risk score calculation."
   ],
-  "run_instructions": "Create a virtual environment using `python -m venv .venv`. Activate the environment and install dependencies with `pip install -r requirements.txt`. Place the optimized workbook inside the data folder. Start the application using `python app.py`. Open the local URL displayed in the terminal to access the Vendor Risk Radar dashboard. Use the Data Risk Focus and Network Risk Focus scenarios to compare risk perspectives and select a vendor to view detailed evidence, risk drivers and scoring rationale."
+  "run_instructions": "Install dependencies using 'pip install -r backend/requirements.txt'. Launch the application using 'python backend/app.py'. Open the local URL displayed in the terminal. Use the Risk Radar dashboard to explore vendors, switch between Data Risk Focus and Network Risk Focus scenarios, review risk rankings, and drill into vendor-specific details and evidence."
 }
